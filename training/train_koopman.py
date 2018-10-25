@@ -23,25 +23,23 @@ def main():
     parser.add_argument('--save_name',          type= str,  default='koopman_model', help='name of checkpoint files for saving')
 
     parser.add_argument('--seq_length',         type=int,   default= 32,        help='sequence length for training')
-    parser.add_argument('--batch_size',         type=int,   default= 128,       help='minibatch size')
-    parser.add_argument('--num_cells',          type=int,   default= 40584,     help='number of elements contained within each solution')
-    parser.add_argument('--n_channels',         type=int,   default= 5,         help='number of channels in input (number of unique values at each point)')
-    parser.add_argument('--code_dim',           type=int,   default= 32,        help='dimensionality of code')
+    parser.add_argument('--batch_size',         type=int,   default= 1,         help='minibatch size')
+    parser.add_argument('--code_dim',           type=int,   default= 64,        help='dimensionality of code')
     parser.add_argument('--action_dim',         type=int,   default= 1,         help='actions dimensionality')
 
     parser.add_argument('--num_epochs',         type=int,   default= 50,        help='number of epochs')
     parser.add_argument('--learning_rate',      type=float, default= 0.00075,   help='learning rate')
-    parser.add_argument('--decay_rate',         type=float, default= 0.75,      help='decay rate for learning rate')
-    parser.add_argument('--l2_regularizer',     type=float, default= 5.0,       help='regularization for least squares')
+    parser.add_argument('--decay_rate',         type=float, default= 0.5,       help='decay rate for learning rate')
+    parser.add_argument('--l2_regularizer',     type=float, default= 10.0,      help='regularization for least squares')
     parser.add_argument('--grad_clip',          type=float, default= 5.0,       help='clip gradients at this value')
 
     parser.add_argument('--data_dir',           type=str,   default='',         help='directory containing cylinder data')
-    parser.add_argument('--n_sequences',        type=int,   default= 1,         help='number of files to load for training')
-    parser.add_argument('--recursive_pred',     type=bool,  default= False,     help='whether to generate recursive predictions for y')
-    parser.add_argument('--halve_seq',          type=bool,  default= False,     help='whether to generate A-matrix based on only half of sequence')
+    parser.add_argument('--n_sequences',        type=int,   default= 1200,      help='number of files to load for training')
+    parser.add_argument('--recursive_pred',     type=bool,  default= True,      help='whether to generate recursive predictions for y')
+    parser.add_argument('--halve_seq',          type=bool,  default= True,      help='whether to generate A-matrix based on only half of sequence')
     parser.add_argument('--control_input',      type=bool,  default= False,     help='whether to account for control input in modeling dynamics')
     parser.add_argument('--start_file',         type=int,   default= 100,       help='first file number to load for training')
-    parser.add_argument('--stagger',            type=int,   default= 500,       help='number of time steps between training examples')
+    parser.add_argument('--stagger',            type=int,   default= 1,         help='number of time steps between training examples')
 
     ######################################
     #          Network Params            #
