@@ -20,6 +20,8 @@ Example command to train a Deep Koopman model:
 * ```find_matrices.py``` - script to load a trained neural network model and determine the B-matrix, action normalization parameters, and goal state encoding.
 * ```find_dynamics.py``` - script to load a trained neural network model and output the current state encoding and the A-matrix based on the previous sequence of observed states and actions.
 
+Note that many of these scripts contain paths that are specific to the machine they were run on. They will need to be updated in order to get the code to run elsewhere.
+
 
 
 
