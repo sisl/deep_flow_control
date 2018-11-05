@@ -64,18 +64,14 @@ def main():
 
     # Construct model
     net = KoopmanModel(args)
-    
-    # Define directory for data
-    if len(args.data_dir) == 0:
-        args.data_dir = '/raid/jeremy/2d_cyl/image_data/'
 
     # Either reconstruct or train
     if args.reconstruct:
         reconstruct_koopman_2d(args, net)
     else:
         # Only dump args if training
-        with open('args.pkl', 'wb') as f:
-            pickle.dump(args, f)
+        with open('args.json', 'w') as f:
+            json.dump(vars(args), f)
         train(args, net)
 
 # Train network
