@@ -15,10 +15,13 @@ Example command to train a Deep Koopman model:
 
 ```python train_koopman.py --num_filters 256 128 64 32 16 --control_input True```
 
-## ```mpc_scripts``` Directory
-* ```config.ini``` - example config file that defines parameters for a PyFR simulation of the 2D cylinder system.
-* ```controller.py``` - script that interfaces with PyFR to generate training data and select control inputs. Depending on specifications in config file, can either apply control inputs using a predefined control law or perform model predictive control to select control inputs. Also periodically takes full solutions, extracts the relevant information needed to construct neural network inputs, and writes them to a file.
-* ```loc_to_idx.pkl``` - Pickle file containing a map from spatial locations in full CFD solutions to indices in the arrays used as neural network inputs.
+## ```mpc_files``` Directory
+* ```config.ini``` - example config file that defines parameters for a PyFR simulation of the 2D cylinder system. Relevant parameters that may need to be modified can be found in the ```soln-plugin-controller``` section.
+* ```new.patch``` - patch that can be applied to PyFR to allow for prescribing an angular velocity on the surface of the cylinder and performing model predictive control.
+* ```mesh.pyfrm``` - mesh file required to run simulation of 2D cylinder system.
+* ```cyl-2d-p2-1530.pyfrs``` - solution file that can be used to initialize simulations of the 2D cylinder system.
+* ```base.h5``` - snapshot of steady base flow that defines the goal state in model predictive control.
+* ```loc_to_idx.json``` - JSON file containing a map from spatial locations in full CFD solutions to indices in the arrays used as neural network inputs.
 
 
 
