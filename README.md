@@ -23,13 +23,19 @@ Example command to train a Deep Koopman model:
 
 ### ```mpc_files``` Directory
 * ```config.ini``` - example config file that defines parameters for a PyFR simulation of the 2D cylinder system. Relevant parameters that may need to be modified can be found in the ```soln-plugin-controller``` section.
-* ```new.patch``` - patch that can be applied to PyFR to allow for prescribing an angular velocity on the surface of the cylinder and performing model predictive control.
+* ```controller.patch``` - patch that can be applied to PyFR to allow for prescribing an angular velocity on the surface of the cylinder and performing model predictive control.
 * ```mesh.pyfrm``` - mesh file required to run simulation of 2D cylinder system.
 * ```cyl-2d-p2-1530.pyfrs``` - solution file that can be used to initialize simulations of the 2D cylinder system.
 * ```base.h5``` - snapshot of steady base flow that defines the goal state in model predictive control.
 * ```loc_to_idx.json``` - JSON file containing a map from spatial locations in full CFD solutions to indices in the arrays used as neural network inputs.
 
+## Getting Started
+Below we detail the steps required to install the necessary software, generate training data, train a Deep Koopman model, and perform model predictive control.
 
+### Software Installation
+Make sure to install [TensorFlow](https://www.tensorflow.org/install/) and [PyFR](http://www.pyfr.org). Detailed PyFR installation instructions can be found [here](http://www.hpcadvisorycouncil.com/pdf/PyFR_Best_Practices.pdf). Make sure to install PyFR v1.7.6.
+
+Once PyFR has been installed, copy ```controller.patch``` into the top-level directory and run ```git apply controller.patch``` to modify the PyFR code in order to enable simulation with control inputs. This patch will create a file named ```controller.py``` in the ```pyfr/plugins``` directory that contains the necessary code for defining control laws and performing model predictive control.
 
 
 
