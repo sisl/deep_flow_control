@@ -1,9 +1,13 @@
 # Deep Flow Control
-Source code for "Deep Dynamical Modeling and Control of Unsteady Fluid Flows" from NIPS 2018. A description of the individual files is given below.
+Source code for "Deep Dynamical Modeling and Control of Unsteady Fluid Flows" from NIPS 2018. The paper can be found [here](https://arxiv.org/pdf/1805.07472.pdf).
+
 
 ![](gifs/vortex.gif)
 
-## ```training``` Directory
+
+## Overview
+A description of the individual files is given below.
+### ```training``` Directory
 * ```koopman_model.py``` - script for defining architecture of and constructing Deep Koopman models for training.
 * ```train_koopman.py``` - training script for Deep Koopman models.
 * ```bayes_filter.py``` - script for defining architecture of and constructing Deep Variational Bayes Filter models.
@@ -17,7 +21,7 @@ Example command to train a Deep Koopman model:
 
 ```python train_koopman.py --num_filters 256 128 64 32 16 --control_input True```
 
-## ```mpc_files``` Directory
+### ```mpc_files``` Directory
 * ```config.ini``` - example config file that defines parameters for a PyFR simulation of the 2D cylinder system. Relevant parameters that may need to be modified can be found in the ```soln-plugin-controller``` section.
 * ```new.patch``` - patch that can be applied to PyFR to allow for prescribing an angular velocity on the surface of the cylinder and performing model predictive control.
 * ```mesh.pyfrm``` - mesh file required to run simulation of 2D cylinder system.
