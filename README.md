@@ -1,6 +1,8 @@
 # Deep Flow Control
 Source code for "Deep Dynamical Modeling and Control of Unsteady Fluid Flows" from NIPS 2018. A description of the individual files is given below.
 
+![](gifs/vortex.gif)
+
 ## ```training``` Directory
 * ```koopman_model.py``` - script for defining architecture of and constructing Deep Koopman models for training.
 * ```train_koopman.py``` - training script for Deep Koopman models.
