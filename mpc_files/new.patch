@@ -12,7 +12,7 @@ index 3de3c10..500a070 100644
  from pyfr.plugins.nancheck import NaNCheckPlugin
 diff --git a/pyfr/plugins/controller.py b/pyfr/plugins/controller.py
 new file mode 100644
-index 0000000..21764dc
+index 0000000..9ce2c24
 --- /dev/null
 +++ b/pyfr/plugins/controller.py
 @@ -0,0 +1,336 @@
@@ -118,7 +118,7 @@ index 0000000..21764dc
 +            self.save_dir = self.cfg.getpath(cfgsect, 'save_dir')
 +
 +            # Define directory containing base flow solution
-+            base_path = self.cfg.getpath(cfgsect, 'base_path')
++            base_flow = self.cfg.getpath(cfgsect, 'base_flow')
 +
 +            # Set constraints for mpc
 +            self.R = self.cfg.getfloat(cfgsect, 'R')
@@ -135,7 +135,7 @@ index 0000000..21764dc
 +            self.x_pred = np.zeros(args.code_dim)
 +
 +            # Run script to find desired attributes and store them
-+            command = "python " + self.training_path + "/find_matrices.py " + self.training_path + " " + self.ckpt_name + " " + base_dir
++            command = "python " + self.training_path + "/find_matrices.py " + self.training_path + " " + self.ckpt_name + " " + base_flow
 +            subprocess.call(command.split())
 +
 +            # Load desired attributes from file
