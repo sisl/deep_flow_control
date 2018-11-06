@@ -45,6 +45,9 @@ The scripts in the ```training``` directory can be used to train a Deep Koopman 
 
 ```python train_koopman.py --num_filters 256 128 64 32 16 --control_input True ---data_dir (data_dir)```
 
-where ```(data_dir)``` is the directory where training data has been stored. By default checkpoints will be written to a directory named ```checkpoints```.
+where ```(data_dir)``` is the directory where training data has been stored. By default checkpoints will be written to a directory named ```./checkpoints```.
+
+### Running MPC
+Once you have a trained model, modify the arguments in ```config.ini``` to perform model predictive control. In particular, you will need to set ```mpc = 1```, change ```training_path``` to be the path to the directory where the training scripts are located, modify ```checkpoint``` to correspond to the desired model checkpoint, and change ```base_flow``` to contain the correct path to the file ```base.h5```. From this point, simulations can be run with the same command used to generate the training data.
 
 
