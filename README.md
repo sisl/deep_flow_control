@@ -37,5 +37,10 @@ Make sure to install [TensorFlow](https://www.tensorflow.org/install/) and [PyFR
 
 Once PyFR has been installed, copy ```controller.patch``` into the top-level directory and run ```git apply controller.patch``` to modify the PyFR code in order to enable simulation with control inputs. This patch will create a file named ```controller.py``` in the ```pyfr/plugins``` directory that contains the necessary code for defining control laws and performing model predictive control.
 
+### Generating Training Data
+Once PyFR has been successfully installed, simulations can be run in order to generate training data. Move the files ```config.ini```, ```mesh.pyfrm```, ```cyl-2d-p2-1530.pyfrs```, and ```loc_to_idx.json``` to the same directory. Modify ```config.ini``` and ```controller.py``` as desired and run the command:
+```pyfr restart -bcuda -p mesh.pyfrm cyl-2d-p2-1530.pyfrs config.ini```
+To begin a simulation using the CUDA backend. Training data will be saved to the directory defined by ```save_dir`` in ```config.ini ```.
+
 
 
