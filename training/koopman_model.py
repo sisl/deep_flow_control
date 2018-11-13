@@ -103,7 +103,7 @@ class KoopmanModel():
         self.A = tf.matrix_solve_ls(code_x_reshape[:, :hi_idx], code_y_reshape[:, :hi_idx], l2_regularizer=args.l2_regularizer)
         
         # Get predicted code at first time step
-        y_pred = tf.matmul(code_x_reshape, self.K)
+        y_pred = tf.matmul(code_x_reshape, self.A)
 
         # If desired, create recursive predictions for y
         if args.recursive_pred:
