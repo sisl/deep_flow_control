@@ -141,7 +141,6 @@ def train(args, net):
             # Initialize loss
             loss = 0.0
             rec_loss = 0.0
-            code_loss = 0.0
 
             # Set learning rate
             if (old_score - score) < 0.01:
@@ -195,7 +194,6 @@ def train(args, net):
                     print ''
                     loss = 0.0
                     rec_loss = 0.0
-                    code_loss = 0.0
 
             # Save model every epoch
             checkpoint_path = os.path.join(args.save_dir, args.save_name + '.ckpt')
