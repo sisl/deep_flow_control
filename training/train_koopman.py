@@ -171,7 +171,6 @@ def train(args, net):
 
                 # Find loss and perform training operation
                 feed_out = [net.cost, net.loss_reconstruction, net.train]
-                feed_out += [net.code_error]
                 
                 # Sometimes things blow up when it tries to take least-squares
                 try:
@@ -182,7 +181,6 @@ def train(args, net):
                 # Update and display cumulative losses
                 loss += out[0]
                 rec_loss += out[1]
-                code_loss += out[-1]
 
                 end = time.time()
 
@@ -194,9 +192,6 @@ def train(args, net):
                     print "{}/{} (epoch {}), rec_loss = {:.3f}, time/batch = {:.3f}" \
                       .format(e * data_loader.n_batches_train + b, args.num_epochs * data_loader.n_batches_train,
                               e, rec_loss/10, end - start)
-                    print "{}/{} (epoch {}), code_loss = {:.3f}, time/batch = {:.3f}" \
-                      .format(e * data_loader.n_batches_train + b, args.num_epochs * data_loader.n_batches_train,
-                          e, code_loss*args.code_weight/10, end - start)
                     print ''
                     loss = 0.0
                     rec_loss = 0.0
