@@ -15,9 +15,6 @@ class KoopmanModel():
         # Normalization parameters to be stored
         self.shift = tf.Variable(np.zeros(4), trainable=False, name="input_shift")
         self.scale = tf.Variable(np.zeros(4), trainable=False, name="input_scale")
-        if args.control_input:
-            self.shift_u = tf.Variable(np.zeros(args.action_dim), trainable=False, name="control_shift")
-            self.scale_u = tf.Variable(np.zeros(args.action_dim), trainable=False, name="control_scale")
         
         # Create the computational graph
         self._create_encoder(args)

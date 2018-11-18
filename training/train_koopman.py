@@ -4,9 +4,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import argparse
 from dataloader import DataLoader
 import h5py
+import json
 import tensorflow as tf
 import numpy as np
-import pickle
 import time
 from koopman_model import KoopmanModel
 from utils import reconstruct_koopman_2d
@@ -89,16 +89,11 @@ def train(args, net):
         # Find normalization params if stored
         shift = sess.run(net.shift)
         scale = sess.run(net.scale)
-        shift_u = sess.run(net.shift_u) if args.control_input else np.zeros(args.action_dim)
-        scale_u = sess.run(net.scale_u) if args.control_input else np.zeros(args.action_dim)
 
         # Load data and store normalization params
-        data_loader = DataLoader(args, shift, scale, shift_u, scale_u)
+        data_loader = DataLoader(args, shift, scale)
         sess.run(tf.assign(net.shift, data_loader.shift_x))
         sess.run(tf.assign(net.scale, data_loader.scale_x))
-        if args.control_input:
-            sess.run(tf.assign(net.shift_u, data_loader.shift_u))
-            sess.run(tf.assign(net.scale_u, data_loader.scale_u))
 
         #Function to evaluate loss on validation set
         def val_loss():

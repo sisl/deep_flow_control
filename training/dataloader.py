@@ -6,12 +6,10 @@ import progressbar
 
 # Class to load and preprocess data
 class DataLoader():
-    def __init__(self, args, shift, scale, shift_u, scale_u, net=None, sess=None):
+    def __init__(self, args, shift, scale, net=None, sess=None):
         self.batch_size = args.batch_size*args.seq_length
         self.shift_x = shift
         self.scale_x = scale
-        self.shift_u = shift_u
-        self.scale_u = scale_u
         self.net = net
         self.sess = sess
         self.seq_length = args.seq_length
@@ -100,16 +98,13 @@ class DataLoader():
         if np.sum(self.scale_x) == 0.0:
             self.shift_x = np.mean(self.x[:self.n_batches_train], axis=(0, 1, 2, 3, 4))
             self.scale_x = np.std(self.x[:self.n_batches_train], axis=(0, 1, 2, 3, 4))
-            if args.control_input:
-                self.shift_u = np.mean(self.u[:self.n_batches_train], axis=(0, 1, 2))
-                self.scale_u = np.std(self.u[:self.n_batches_train], axis=(0, 1, 2))
 
     # Sample a new batch of data
     def next_batch_train(self):
         # Extract next batch
         batch_index = self.batch_permuation_train[self.batchptr_train]
         self.batch_dict["inputs"] = (self.x[batch_index] - self.shift_x)/self.scale_x
-        if self.control_input: self.batch_dict["actions"] = (self.u[batch_index] - self.shift_u)/self.scale_u
+        if self.control_input: self.batch_dict["actions"] = self.u[batch_index]
 
         # Update pointer
         self.batchptr_train += 1
@@ -125,7 +120,7 @@ class DataLoader():
         # Extract next validation batch
         batch_index = self.batchptr_val + self.n_batches_train-1
         self.batch_dict["inputs"] = (self.x[batch_index] - self.shift_x)/self.scale_x
-        if self.control_input: self.batch_dict["actions"] = (self.u[batch_index] - self.shift_u)/self.scale_u
+        if self.control_input: self.batch_dict["actions"] = self.u[batch_index]
 
         # Update pointer
         self.batchptr_val += 1
@@ -136,7 +131,7 @@ class DataLoader():
         # Extract next validation batch
         batch_index = random.randint(self.n_batches_train, self.n_batches-1)
         self.batch_dict["inputs"] = (self.x[batch_index] - self.shift_x)/self.scale_x
-        if self.control_input: self.batch_dict["actions"] = (self.u[batch_index] - self.shift_u)/self.scale_u
+        if self.control_input: self.batch_dict["actions"] = self.u[batch_index]
         return self.batch_dict
 
     # Return to first batch in validation set
