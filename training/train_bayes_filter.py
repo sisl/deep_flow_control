@@ -31,8 +31,10 @@ def main():
     parser.add_argument('--decay_rate',         type=float, default= 0.75,      help='decay rate for learning rate')
     parser.add_argument('--grad_clip',          type=float, default= 5.0,       help='clip gradients at this value')
 
-    parser.add_argument('--data_dir',           type=str,   default='/raid/jeremy/2d_periodic/euler_vortex_2d/', help='directory containing cylinder data')
+    parser.add_argument('--data_dir',           type=str,   default='',         help='directory containing cylinder data')
     parser.add_argument('--n_sequences',        type=int,   default= 1,         help='number of files to load for training')
+    parser.add_argument('--min_num',            type=int,   default= 0,         help='lowest number time snapshot to load for training')
+    parser.add_argument('--max_num',            type=int,   default= 5000,      help='highest number time snapshot to load for training')
     parser.add_argument('--stagger',            type=int,   default= 500,       help='number of time steps between training examples')
     parser.add_argument('--control_input',      type=bool,  default= False,     help='whether to account for control input in modeling dynamics')
     parser.add_argument('--rec_vel',            type=bool,  default= False,     help='whether to reconstruct velocity values from codes')

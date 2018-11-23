@@ -28,12 +28,10 @@ class DataLoader():
         self._shift_scale(args)
 
     def _load_data_2d(self, args):
-        # Loop through data files and load solutions
-        min_num = 0
-        max_num = 5263        
+        # Loop through data files and load solutions      
         n_files = args.n_sequences*(args.seq_length+1)
-        max_gap = (max_num - args.stagger*args.seq_length)/args.n_sequences
-        start_idxs = np.linspace(min_num, max_gap*args.n_sequences, args.n_sequences)
+        max_gap = (args.max_num - args.stagger*args.seq_length)/args.n_sequences
+        start_idxs = np.linspace(args.min_num, max_gap*args.n_sequences, args.n_sequences)
         file_nums = np.array([])
         for i in xrange(args.n_sequences):
             file_nums = np.concatenate([file_nums, np.linspace(start_idxs[i], start_idxs[i] + args.seq_length*args.stagger, args.seq_length+1)])
