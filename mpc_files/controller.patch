@@ -12,10 +12,10 @@ index 3de3c10..500a070 100644
  from pyfr.plugins.nancheck import NaNCheckPlugin
 diff --git a/pyfr/plugins/controller.py b/pyfr/plugins/controller.py
 new file mode 100644
-index 0000000..9ce2c24
+index 0000000..d998ce1
 --- /dev/null
 +++ b/pyfr/plugins/controller.py
-@@ -0,0 +1,336 @@
+@@ -0,0 +1,347 @@
 +# -*- coding: utf-8 -*-
 +import glob
 +import h5py
@@ -24,8 +24,11 @@ index 0000000..9ce2c24
 +import os, sys
 +import subprocess
 +import tensorflow as tf
++import argparse
 +
 +from cvxpy import *
++from builtins import min
++from builtins import max
 +from koopman_model import KoopmanModel
 +from pyfr.mpiutil import get_comm_rank_root, get_mpi
 +from pyfr.plugins.base import BasePlugin
@@ -101,11 +104,11 @@ index 0000000..9ce2c24
 +        self.pts = self.cfg.getliteral(cfgsect, 'samp-pts')
 +        self.fmt = self.cfg.get(cfgsect, 'format', 'primitive')
 +
++        # Define directory where solution snapshots should be saved
++        self.save_dir = self.cfg.getpath(cfgsect, 'save_dir')
++
 +        # If performing mpc, then load network
 +        if self.perform_mpc:
-+            # Define array to hold old time snapshots and control inputs of the system
-+            self.X = np.zeros((args.seq_length//2 + 1, 128, 256, 4), dtype=np.float32)
-+            self.u = np.zeros((args.seq_length//2, args.action_dim), dtype=np.float32)
 +
 +            # Define checkpoint name
 +            self.ckpt_name = self.cfg.get(cfgsect, 'checkpoint')
@@ -114,8 +117,7 @@ index 0000000..9ce2c24
 +            self.training_path = self.cfg.getpath(cfgsect, 'training_path')
 +            sys.path.append(self.training_path)
 +
-+            # Define directory where solution snapshots should be saved
-+            self.save_dir = self.cfg.getpath(cfgsect, 'save_dir')
++
 +
 +            # Define directory containing base flow solution
 +            base_flow = self.cfg.getpath(cfgsect, 'base_flow')
@@ -128,11 +130,15 @@ index 0000000..9ce2c24
 +            with open(self.training_path + '/args.json') as args_dict:
 +                args_dict = json.load(args_dict,)
 +            self.args = argparse.Namespace()
-+            for (k, v) in arg_dict.items():
++            for (k, v) in args_dict.items():
 +                vars(self.args)[k] = v
 +
++            # Define array to hold old time snapshots and control inputs of the system
++            self.X = np.zeros((self.args.seq_length//2 + 1, 128, 256, 4), dtype=np.float32)
++            self.u = np.zeros((self.args.seq_length//2, self.args.action_dim), dtype=np.float32)
++
 +            # Initialize predicted state
-+            self.x_pred = np.zeros(args.code_dim)
++            self.x_pred = np.zeros(self.args.code_dim)
 +
 +            # Run script to find desired attributes and store them
 +            command = "python " + self.training_path + "/find_matrices.py " + self.training_path + " " + self.ckpt_name + " " + base_flow
@@ -141,8 +147,6 @@ index 0000000..9ce2c24
 +            # Load desired attributes from file
 +            f = h5py.File('./matrices_misc.h5', 'r')
 +            self.B = np.array(f['B'])
-+            self.shift_u = f['shift_u'].value[0]
-+            self.scale_u = f['scale_u'].value[0]
 +            self.goal_state = np.array(f['goal_state'])
 +
 +        # Initial omega
@@ -158,9 +162,13 @@ index 0000000..9ce2c24
 +        # Physical location of the solution points
 +        plocs = [p.swapaxes(1, 2) for p in intg.system.ele_ploc_upts]
 +
-+        # Load map from point to index                                                                                                                                                                     
++        # Load map from point to index
 +        with open('loc_to_idx.json') as loc_to_idx:
-+                loc_to_idx = json.load(loc_to_idx,)
++            loc_to_idx_str = json.load(loc_to_idx,)
++            self.loc_to_idx = dict()
++            for key in loc_to_idx_str:
++                self.loc_to_idx[int(key)] = loc_to_idx_str[key]
++
 +
 +        # Locate the closest solution points in our partition
 +        closest = _closest_upts(intg.system.ele_types, plocs, self.pts)
@@ -222,18 +230,18 @@ index 0000000..9ce2c24
 +        # Construct and solve optimization problem
 +        states = []
 +        for t in range(T):
-+            cost = quad_form((x[:,t+1] - self.goal_state), Q) + quad_form((u[:,t]*self.scale_u + self.shift_u), R)
++            cost = quad_form((x[:,t+1] - self.goal_state), Q) + quad_form(u[:,t], R)
 +            constr = [x[:,t+1] == A*x[:,t] + B*u[:,t],
-+                        norm(u[:,t]*self.scale_u + self.shift_u, 'inf') <= self.u_max]
++                        norm(u[:,t], 'inf') <= self.u_max]
 +            states.append(Problem(Minimize(cost), constr))
-+        
++
 +        # Sum problem objectives and concatenate constraints
 +        prob = sum(states)
 +        prob.constraints += [x[:,0] == x0]
 +        prob.solve()
 +        x1 = np.array([x.value[i, 1] for i in range(x.value.shape[0])])
 +        try:
-+            return u.value[0, 0]*self.scale_u + self.shift_u # Change if not scalar input
++            return u.value[0, 0] # Change if not scalar input
 +        except:
 +            return 0.0
 +
@@ -280,8 +288,11 @@ index 0000000..9ce2c24
 +
 +            # Define info for saving to file
 +            list_of_files = glob.glob(self.save_dir + '/*')
-+            latest_file = max(list_of_files, key=os.path.getctime)
-+            file_num = int(latest_file[-7:-3])
++            if len(list_of_files) == 0:
++                file_num = 0
++            else:
++                latest_file = max(list_of_files, key=os.path.getctime)
++                file_num = int(latest_file[-7:-3])
 +
 +            # Save data in desired format
 +            # Define freestream values for to be used for cylinder
@@ -306,13 +317,13 @@ index 0000000..9ce2c24
 +            pred_error = 0.0
 +
 +            if self.set_omega == 0:
-+                omega = 0.0    
++                omega = 0.0
 +            elif self.perform_mpc:
 +                # Find model of system and determine optimal input with MPC
 +                try:
 +                    A, x0 = self._find_dynamics()
 +                    if np.linalg.norm(self.X[0]) > 0.0:
-+                        u0 = (self.u[-1] - self.shift_u)/self.scale_u
++                        u0 = self.u[-1]
 +                        omega = self._find_mpc_input(A, self.B, x0)
 +                    else:
 +                        omega = 0.0 # No input if insufficient data to construct dynamical model
@@ -330,18 +341,18 @@ index 0000000..9ce2c24
 +
 +
 +                # Proportional control
-+                # location = 88 # re50 
++                # location = 88 # re50
 +                # gain = 0.4 # re50
 +                # rho = sol_data[64, location, 0]
 +                # rho_v = sol_data[64, location, 2]
 +                # omega = gain*rho_v/rho
-+                
++
 +
 +            # Save data if desired
 +            if self.save_data == 1:
 +                # Save to h5 file
 +                file_num += 1
-+                filename = save_dir + '/sol_data_' + str(file_num).zfill(4) + '.h5'
++                filename = self.save_dir + '/sol_data_' + str(file_num).zfill(4) + '.h5'
 +                f = h5py.File(filename, 'w')
 +                f['sol_data'] = sol_data
 +                f['control_input'] = omega

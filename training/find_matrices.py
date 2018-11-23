@@ -11,7 +11,8 @@ import os, sys
 import h5py
 import tensorflow as tf
 import numpy as np
-import pickle
+import json
+import argparse
 
 from koopman_model import KoopmanModel
 
@@ -19,9 +20,8 @@ from koopman_model import KoopmanModel
 with open(sys.argv[1] + '/args.json') as args_dict:
     args_dict = json.load(args_dict,)
 args = argparse.Namespace()
-for (k, v) in arg_dict.items():
+for (k, v) in args_dict.items():
     vars(args)[k] = v
-
 # Construct model
 net = KoopmanModel(args)
 
@@ -34,8 +34,6 @@ with tf.Session() as sess:
 
     # Find B-matrix (will be constant)
     B = sess.run(net.B)[0].T
-    shift_u = sess.run(net.shift_u)
-    scale_u = sess.run(net.scale_u)
 
     # To find goal state, find encoding of steady base flow at Re50
     x = np.zeros((args.batch_size*(args.seq_length+1), 128, 256, 4), dtype=np.float32)
@@ -61,7 +59,5 @@ with tf.Session() as sess:
     # Save quantities to file
     f = h5py.File('./matrices_misc.h5', 'w')
     f['B'] = B
-    f['shift_u'] = shift_u
-    f['scale_u'] = scale_u
     f['goal_state'] = goal_state
-    f.close()    
+    f.close()

@@ -1,6 +1,6 @@
 '''
 This script is used to load a saved checkpoint in order to find
-the A-matrix, and initial state encoding based on a previous 
+the A-matrix, and initial state encoding based on a previous
 sequence of observed states and actions.
 
 Note that all paths need to be specified correctly in the config file.
@@ -11,6 +11,7 @@ import json
 import h5py
 import tensorflow as tf
 import numpy as np
+import argparse
 
 from koopman_model import KoopmanModel
 
@@ -18,7 +19,7 @@ from koopman_model import KoopmanModel
 with open(sys.argv[1] + '/args.json') as args_dict:
     args_dict = json.load(args_dict,)
 args = argparse.Namespace()
-for (k, v) in arg_dict.items():
+for (k, v) in args_dict.items():
     vars(args)[k] = v
 
 # Construct model
@@ -36,13 +37,12 @@ with tf.Session() as sess:
     # Read in state data
     f = h5py.File('./X_u.h5', 'r')
     X = np.array(f['X'])
-    u = np.array(f['u']) 
+    u = np.array(f['u'])
     f.close()
 
     # Construct input to network (second half of data will not matter)
     x = np.vstack((X, X[:args.seq_length/2]))
     x = (x - sess.run(net.shift))/sess.run(net.scale)
-    u = (u - sess.run(net.shift_u))/sess.run(net.scale_u)
 
     # Format control inputs
     controls = np.concatenate((u, u))
