@@ -35,6 +35,8 @@ def main():
 
     parser.add_argument('--data_dir',           type=str,   default='',         help='directory containing cylinder data')
     parser.add_argument('--n_sequences',        type=int,   default= 1200,      help='number of files to load for training')
+    parser.add_argument('--min_num',            type=int,   default= 0,         help='lowest number time snapshot to load for training')
+    parser.add_argument('--max_num',            type=int,   default= 5000,      help='highest number time snapshot to load for training')
     parser.add_argument('--recursive_pred',     type=bool,  default= True,      help='whether to generate recursive predictions for y')
     parser.add_argument('--halve_seq',          type=bool,  default= True,      help='whether to generate A-matrix based on only half of sequence')
     parser.add_argument('--control_input',      type=bool,  default= False,     help='whether to account for control input in modeling dynamics')
