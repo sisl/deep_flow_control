@@ -12,10 +12,10 @@ index 3de3c10..500a070 100644
  from pyfr.plugins.nancheck import NaNCheckPlugin
 diff --git a/pyfr/plugins/controller.py b/pyfr/plugins/controller.py
 new file mode 100644
-index 0000000..d998ce1
+index 0000000..5f5b880
 --- /dev/null
 +++ b/pyfr/plugins/controller.py
-@@ -0,0 +1,347 @@
+@@ -0,0 +1,349 @@
 +# -*- coding: utf-8 -*-
 +import glob
 +import h5py
@@ -220,25 +220,26 @@ index 0000000..d998ce1
 +        T = 16
 +
 +        # Define variables
-+        x = Variable(self.args.code_dim, T+1)
-+        u = Variable(self.args.action_dim, T)
++        x = Variable(shape = (self.args.code_dim, T+1))
++        u = Variable(shape = (self.args.action_dim, T))
 +
 +        # Define costs for states and inputs
 +        Q = np.eye(self.args.code_dim)
 +        R = self.R*np.eye(self.args.action_dim)
 +
 +        # Construct and solve optimization problem
-+        states = []
++        cost = 0
++        constr = []
 +        for t in range(T):
-+            cost = quad_form((x[:,t+1] - self.goal_state), Q) + quad_form(u[:,t], R)
-+            constr = [x[:,t+1] == A*x[:,t] + B*u[:,t],
++            cost += quad_form((x[:,t+1] - self.goal_state), Q) + quad_form(u[:,t], R)
++            constr += [x[:,t+1] == A*x[:,t] + (B*u[:,t])[:,0],
 +                        norm(u[:,t], 'inf') <= self.u_max]
-+            states.append(Problem(Minimize(cost), constr))
 +
 +        # Sum problem objectives and concatenate constraints
-+        prob = sum(states)
-+        prob.constraints += [x[:,0] == x0]
++        constr += [x[:,0] == x0]
++        prob = Problem(Minimize(cost),constr)
 +        prob.solve()
++        
 +        x1 = np.array([x.value[i, 1] for i in range(x.value.shape[0])])
 +        try:
 +            return u.value[0, 0] # Change if not scalar input
@@ -328,6 +329,7 @@ index 0000000..d998ce1
 +                    else:
 +                        omega = 0.0 # No input if insufficient data to construct dynamical model
 +                except:
++                    print("Had an error in mpc -- setting omega to 0")
 +                    omega = 0.0
 +                self.u = np.concatenate((self.u[1:], np.expand_dims(np.array([omega]), axis=0)))
 +            else:
